@@ -6,12 +6,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.plfdev.to_do_list.databinding.TaskItemBinding
-import com.plfdev.to_do_list.tasks.domain.model.TaskUiModel
+import com.plfdev.to_do_list.tasks.domain.model.Task
 
 class TaskAdapter(
-    private val onDeleteTask: (TaskUiModel) -> Unit,
-    private val onEditTask: (TaskUiModel) -> Unit,
-) : ListAdapter<TaskUiModel, TaskAdapter.TasksViewHolder>(DIFF_CALLBACK) {
+    private val onDeleteTask: (Task) -> Unit,
+    private val onEditTask: (Task) -> Unit,
+) : ListAdapter<Task, TaskAdapter.TasksViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TasksViewHolder {
         val binding = TaskItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -26,7 +26,7 @@ class TaskAdapter(
     inner class TasksViewHolder(private val binding: TaskItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(task: TaskUiModel) {
+        fun bind(task: Task) {
             binding.taskName.text = task.title
             binding.taskDescription.text = task.description
             binding.editTask.setOnClickListener { onEditTask(task) }
@@ -35,17 +35,17 @@ class TaskAdapter(
     }
 
     companion object {
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<TaskUiModel>() {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Task>() {
             override fun areItemsTheSame(
-                oldItem: TaskUiModel,
-                newItem: TaskUiModel
+                oldItem: Task,
+                newItem: Task
             ): Boolean {
                 return oldItem.id == newItem.id
             }
 
             override fun areContentsTheSame(
-                oldItem: TaskUiModel,
-                newItem: TaskUiModel
+                oldItem: Task,
+                newItem: Task
             ): Boolean {
                 return oldItem == newItem
             }

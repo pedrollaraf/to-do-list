@@ -5,16 +5,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.plfdev.to_do_list.databinding.FragmentTaskBinding
-import com.plfdev.to_do_list.tasks.domain.model.TaskUiModel
+import com.plfdev.to_do_list.tasks.domain.model.Task
+import com.plfdev.to_do_list.tasks.presenter.viewmodel.TaskViewModel
+import kotlinx.coroutines.launch
 import java.util.UUID
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class TaskFragment : Fragment() {
 
     private lateinit var binding: FragmentTaskBinding
-
+    private val viewModel: TaskViewModel by viewModel()
     private lateinit var adapter: TaskAdapter
-    private var tasks = mutableListOf<TaskUiModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,63 +30,40 @@ class TaskFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
-        for (index in 1.. 5) {
-            tasks.add(
-                TaskUiModel(
-                    id = UUID.randomUUID().toString(),
-                    title = "Task: $index",
-                    description = "Task description : $index",
-                )
-            )
-        }
         setupAdapter()
+
+        lifecycleScope.launch {
+            viewModel.tasks.collect { tasks ->
+                adapter.submitList(tasks)
+            }
+        }
+
         binding.addButton.setOnClickListener {
-            val newToDoItem = TaskUiModel(
+            val newToDoItem = Task(
                 id = UUID.randomUUID().toString(),
                 title = "New Item",
                 description = "New description item",
                 isCompleted = true
             )
-            addTask(newToDoItem)
+            viewModel.addTask(newToDoItem)
+        }
+
+        binding.syncButton.setOnClickListener {
+            viewModel.sync()
         }
     }
 
     private fun setupAdapter() {
         adapter = TaskAdapter(
             onDeleteTask = { task ->
-                deleteTask(task)
+                viewModel.deleteTask(task)
             },
             onEditTask = { task ->
                 val updatedToDoItem = task.copy(title = "TOTTENHAM")
-                updateTask(updatedToDoItem)
+                viewModel.updateTask(updatedToDoItem)
             },
         )
 
         binding.rvTasks.adapter = adapter
-        adapter.submitList(tasks)
-    }
-
-    private fun deleteTask(toDoItem: TaskUiModel) {
-        val position = getPositionOfFirstId(toDoItem.id)
-        tasks.removeAt(position)
-        adapter.notifyItemRemoved(position)
-    }
-
-    private fun updateTask(toDoItem : TaskUiModel) {
-        val position = getPositionOfFirstId(toDoItem.id)
-        tasks[position] = toDoItem
-        adapter.notifyItemChanged(position)
-    }
-
-    private fun addTask(newToDoItem: TaskUiModel) {
-        tasks.add(newToDoItem)
-        adapter.notifyItemInserted(tasks.size - 1)
-    }
-
-
-    private fun getPositionOfFirstId(taskId: String): Int {
-        return tasks.indexOfFirst { it.id == taskId }
     }
 }
