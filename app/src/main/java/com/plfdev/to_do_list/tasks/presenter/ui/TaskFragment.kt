@@ -10,7 +10,6 @@ import com.plfdev.to_do_list.databinding.FragmentTaskBinding
 import com.plfdev.to_do_list.tasks.domain.model.Task
 import com.plfdev.to_do_list.tasks.presenter.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
-import java.util.UUID
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class TaskFragment : Fragment() {
@@ -40,28 +39,43 @@ class TaskFragment : Fragment() {
 
         binding.addButton.setOnClickListener {
             val newToDoItem = Task(
-                id = UUID.randomUUID().toString(),
                 title = "New Item",
                 description = "New description item",
-                isCompleted = true
+                isAdded = true
             )
             viewModel.addTask(newToDoItem)
         }
 
         binding.syncButton.setOnClickListener {
-            viewModel.sync()
+            viewModel.syncTasks()
         }
     }
 
     private fun setupAdapter() {
         adapter = TaskAdapter(
             onDeleteTask = { task ->
-                viewModel.deleteTask(task)
+                val deletedTask = task.copy(
+                    isDeleted = true,
+                    isSynced = false
+                )
+                viewModel.updateTask(deletedTask)
             },
             onEditTask = { task ->
-                val updatedToDoItem = task.copy(title = "TOTTENHAM")
-                viewModel.updateTask(updatedToDoItem)
+                val updatedTask = task.copy(
+                    title = "TOTTENHAM",
+                    isUpdated = true,
+                    isSynced = false
+                )
+                viewModel.updateTask(updatedTask)
             },
+            onUndoTask = { task ->
+                val undoTask = task.copy(
+                    isDeleted = false,
+                    isSynced = false,
+                    isUpdated = true
+                )
+                viewModel.updateTask(undoTask)
+            }
         )
 
         binding.rvTasks.adapter = adapter

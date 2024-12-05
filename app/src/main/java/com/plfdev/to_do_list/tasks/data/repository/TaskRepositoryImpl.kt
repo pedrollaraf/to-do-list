@@ -6,16 +6,16 @@ import com.plfdev.to_do_list.core.data.networking.constructUrl
 import com.plfdev.to_do_list.core.data.networking.safeCall
 import com.plfdev.to_do_list.core.domain.util.DataError
 import com.plfdev.to_do_list.core.domain.util.Either
-import com.plfdev.to_do_list.core.domain.util.Either.Companion.onFailure
-import com.plfdev.to_do_list.core.domain.util.Either.Companion.onSuccess
+import com.plfdev.to_do_list.core.domain.util.Either.Companion.error
+import com.plfdev.to_do_list.core.domain.util.Either.Companion.success
 import com.plfdev.to_do_list.tasks.data.dao.TaskDao
 import com.plfdev.to_do_list.tasks.data.dto.TaskDto
-import com.plfdev.to_do_list.tasks.data.mappers.toDto
 import com.plfdev.to_do_list.tasks.data.mappers.toEntity
 import com.plfdev.to_do_list.tasks.data.mappers.toTask
 import com.plfdev.to_do_list.tasks.domain.model.Task
 import com.plfdev.to_do_list.tasks.domain.repository.TaskRepository
 import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -31,55 +31,52 @@ class TaskRepositoryImpl(
             val tasks = taskDao.getTasks().map { task ->
                 task.toTask()
             }
-            return Either.success(tasks)
+            return success(tasks)
         } catch (exception: Exception) {
-            return Either.error(DataError.Local.GET_TASKS_ERROR)
+            return error(DataError.Local.GET_TASKS_ERROR)
         }
     }
 
-    override suspend fun addTask(task: Task): Either<Unit> {
+    override suspend fun addTask(task: Task): Either<Long> {
         try {
-            val entity = task.toEntity(synced = false)
+            val entity = task.toEntity()
             val result = taskDao.insertTask(entity)
-            return Either.success(result)
+            return success(result)
         } catch (exception: Exception) {
             Log.e("DATAERROR:",exception.toString())
-            return Either.error(DataError.Local.DISK_FULL)
+            return error(DataError.Local.DISK_FULL)
         }
     }
 
     override suspend fun updateTask(task: Task): Either<Unit> {
         try {
-            val entity = task.toEntity(synced = false)
-            val result = taskDao.updateTask(entity)
-            return Either.success(result)
-        } catch (exception: Exception) {
-            return Either.error(DataError.Local.UPDATE_ERROR)
-        }
-    }
-
-    override suspend fun deleteTask(task: Task): Either<Unit> {
-        try {
             val entity = task.toEntity()
-            val result = taskDao.deleteTask(entity)
-            return Either.success(result)
+            val result = taskDao.updateTask(entity)
+            return success(result)
         } catch (exception: Exception) {
-            return Either.error(DataError.Local.DELETE_ERROR)
+            return error(DataError.Local.UPDATE_ERROR)
         }
     }
 
-    override suspend fun syncTasks(): Either<Boolean> {
-        val unSyncedTasks = taskDao.getUnSyncedTasks()
-        unSyncedTasks.map { task ->
-            safeCall<TaskDto> {
-                httpClient.post(
-                    urlString = constructUrl("/tasks/"),
-                ) {
-                    contentType(ContentType.Application.Json)
-                    setBody(task.toDto())
-                }
+    override suspend fun syncTaskWhenAdd(task: Task): Either<TaskDto> {
+        return safeCall<TaskDto> {
+            httpClient.post(
+                urlString = constructUrl("/tasks")
+            ) {
+                contentType(ContentType.Application.Json)
+                setBody(task)
             }
         }
-        return Either.success(true)
+    }
+
+    override suspend fun syncTaskWhenUpdate(task: Task): Either<TaskDto> {
+        return safeCall<TaskDto> {
+            httpClient.put(
+                urlString = constructUrl("/tasks/${task.id}")
+            ) {
+                contentType(ContentType.Application.Json)
+                setBody(task)
+            }
+        }
     }
 }

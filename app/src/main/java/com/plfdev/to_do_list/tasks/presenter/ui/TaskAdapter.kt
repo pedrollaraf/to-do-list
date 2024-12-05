@@ -1,16 +1,21 @@
 package com.plfdev.to_do_list.tasks.presenter.ui
 
+import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.plfdev.to_do_list.R
 import com.plfdev.to_do_list.databinding.TaskItemBinding
 import com.plfdev.to_do_list.tasks.domain.model.Task
 
 class TaskAdapter(
     private val onDeleteTask: (Task) -> Unit,
     private val onEditTask: (Task) -> Unit,
+    private val onUndoTask: (Task) -> Unit,
 ) : ListAdapter<Task, TaskAdapter.TasksViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TasksViewHolder {
@@ -29,8 +34,32 @@ class TaskAdapter(
         fun bind(task: Task) {
             binding.taskName.text = task.title
             binding.taskDescription.text = task.description
-            binding.editTask.setOnClickListener { onEditTask(task) }
-            binding.deleteTask.setOnClickListener { onDeleteTask(task) }
+
+            if(task.isSynced) {
+                binding.taskName.setTextColor(Color.GREEN)
+            } else {
+                binding.taskName.setTextColor(Color.RED)
+            }
+
+            if(task.isDeleted) {
+                binding.cardTaskItem.setCardBackgroundColor(
+                    ContextCompat.getColor(binding.cardTaskItem.context, R.color.lightRed)
+                )
+                binding.editTask.visibility = View.GONE
+                binding.deleteTask.visibility = View.GONE
+                binding.undoTask.visibility = View.VISIBLE
+                binding.undoTask.setOnClickListener { onUndoTask(task) }
+            } else {
+                binding.cardTaskItem.setCardBackgroundColor(
+                    ContextCompat.getColor(binding.cardTaskItem.context, R.color.white)
+                )
+                binding.editTask.visibility = View.VISIBLE
+                binding.deleteTask.visibility = View.VISIBLE
+                binding.undoTask.visibility = View.GONE
+                binding.editTask.setOnClickListener { onEditTask(task) }
+                binding.deleteTask.setOnClickListener { onDeleteTask(task) }
+            }
+
         }
     }
 

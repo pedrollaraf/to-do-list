@@ -5,7 +5,8 @@ data class Either<out T>(val status: Status, val data: T?, val error: DataError?
     enum class Status {
         SUCCESS,
         LOADING,
-        ERROR
+        ERROR,
+        EMPTY
     }
 
     var isSuccess:Boolean = error == null
@@ -14,6 +15,10 @@ data class Either<out T>(val status: Status, val data: T?, val error: DataError?
     companion object {
         fun <T> success(data: T): Either<T> {
             return Either(Status.SUCCESS, data, null)
+        }
+
+        fun <T> emptyResult(): Either<T> {
+            return Either(Status.EMPTY, null, null)
         }
 
         fun <T> loading(): Either<T> {

@@ -7,7 +7,7 @@ import com.plfdev.to_do_list.tasks.domain.repository.TaskRepository
 class AddTaskUseCases(
     private val taskRepository: TaskRepository
 ) {
-    suspend operator fun invoke(task: Task): Either<Unit> {
+    suspend operator fun invoke(task: Task): Either<Long> {
         return taskRepository.addTask(task)
     }
 }

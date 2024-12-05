@@ -7,7 +7,6 @@ import com.plfdev.to_do_list.core.domain.util.Either.Companion.onFailure
 import com.plfdev.to_do_list.core.domain.util.Either.Companion.onSuccess
 import com.plfdev.to_do_list.tasks.domain.model.Task
 import com.plfdev.to_do_list.tasks.domain.usecases.AddTaskUseCases
-import com.plfdev.to_do_list.tasks.domain.usecases.DeleteTaskUseCases
 import com.plfdev.to_do_list.tasks.domain.usecases.GetTaskUseCases
 import com.plfdev.to_do_list.tasks.domain.usecases.SyncTasksUseCases
 import com.plfdev.to_do_list.tasks.domain.usecases.UpdateTaskUseCases
@@ -23,9 +22,9 @@ class TaskViewModel (
     private val getTaskUseCases: GetTaskUseCases,
     private val addTaskUseCases: AddTaskUseCases,
     private val updateTaskUseCases: UpdateTaskUseCases,
-    private val deleteTaskUseCases: DeleteTaskUseCases,
     private val syncTasksUseCases: SyncTasksUseCases,
 ): ViewModel() {
+
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks.asStateFlow().onStart {
         loadTasks()
@@ -40,6 +39,7 @@ class TaskViewModel (
             val result = getTaskUseCases.invoke()
             result.onSuccess { tasks ->
                 val mutableList = tasks.toMutableList()
+                Log.d("BRATISLAV:", mutableList.toString())
                 _tasks.value = mutableList
             }.onFailure {
                 Log.e("DATAERROR: ", it.toString())
@@ -52,7 +52,7 @@ class TaskViewModel (
             val result = addTaskUseCases.invoke(newTask)
             result.onSuccess {
                 val mutableList = _tasks.value.toMutableList()
-                mutableList.add(newTask)
+                mutableList.add(newTask.copy(id = it))
                 _tasks.value = mutableList
             }.onFailure {
                 Log.e("DATAERROR: ", it.toString())
@@ -64,7 +64,7 @@ class TaskViewModel (
         viewModelScope.launch {
             val result = updateTaskUseCases.invoke(task)
             result.onSuccess {
-                val position = getPositionOfFirstId(task.id)
+                val position = getPositionOfFirstId(task.id!!)
                 val mutableList = _tasks.value.toMutableList()
                 mutableList[position] = task
                 _tasks.value = mutableList
@@ -74,31 +74,18 @@ class TaskViewModel (
         }
     }
 
-    fun deleteTask(task: Task) {
-        viewModelScope.launch {
-            val result = deleteTaskUseCases.invoke(task)
-            result.onSuccess {
-                val mutableList = _tasks.value.toMutableList()
-                mutableList.remove(task)
-                _tasks.value = mutableList
-            }.onFailure {
-                Log.e("DATAERROR: ", it.toString())
-            }
-        }
-    }
-
-    fun sync() {
+    fun syncTasks() {
         viewModelScope.launch {
             val result = syncTasksUseCases.invoke()
             result.onSuccess {
-                Log.e("DATA: ", "SUCESSO")
+                _tasks.value = it
             }.onFailure {
                 Log.e("DATAERROR: ", it.toString())
             }
         }
     }
 
-    private fun getPositionOfFirstId(taskId: String): Int {
+    private fun getPositionOfFirstId(taskId: Long): Int {
         return tasks.value.indexOfFirst { it.id == taskId }
     }
 }

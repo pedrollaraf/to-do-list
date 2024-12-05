@@ -7,5 +7,6 @@ data class TaskDto(
     val id: String,
     val title: String,
     val description: String?,
-    val isCompleted: Boolean
+    val isCompleted: Boolean,
+    val isDeleted: Boolean,
 )

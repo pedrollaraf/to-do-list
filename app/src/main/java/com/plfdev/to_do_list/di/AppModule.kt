@@ -5,7 +5,6 @@ import com.plfdev.to_do_list.core.data.networking.HttpClientFactory
 import com.plfdev.to_do_list.tasks.data.repository.TaskRepositoryImpl
 import com.plfdev.to_do_list.tasks.domain.repository.TaskRepository
 import com.plfdev.to_do_list.tasks.domain.usecases.AddTaskUseCases
-import com.plfdev.to_do_list.tasks.domain.usecases.DeleteTaskUseCases
 import com.plfdev.to_do_list.tasks.domain.usecases.GetTaskUseCases
 import com.plfdev.to_do_list.tasks.domain.usecases.SyncTasksUseCases
 import com.plfdev.to_do_list.tasks.domain.usecases.UpdateTaskUseCases
@@ -28,7 +27,6 @@ val appModule = module {
     singleOf(::TaskRepositoryImpl).bind<TaskRepository>()
     singleOf(::GetTaskUseCases)
     singleOf(::AddTaskUseCases)
-    singleOf(::DeleteTaskUseCases)
     singleOf(::UpdateTaskUseCases)
     singleOf(::SyncTasksUseCases)
     viewModelOf(::TaskViewModel)

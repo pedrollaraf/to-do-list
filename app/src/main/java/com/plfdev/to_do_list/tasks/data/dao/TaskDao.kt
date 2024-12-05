@@ -13,17 +13,11 @@ interface TaskDao {
     suspend fun getTasks(): List<TaskEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(task: TaskEntity)
+    suspend fun insertTask(task: TaskEntity): Long
 
     @Update
     suspend fun updateTask(task: TaskEntity)
 
     @Delete
     suspend fun deleteTask(task: TaskEntity)
-
-    @Query("SELECT * FROM tasks WHERE isSynced = 0")
-    suspend fun getUnSyncedTasks(): List<TaskEntity>
-
-    @Query("UPDATE tasks SET isSynced = 1 WHERE id = :taskId")
-    suspend fun markAsSynced(taskId: Long)
 }

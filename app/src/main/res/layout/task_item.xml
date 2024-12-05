@@ -110,6 +110,33 @@
 
             </androidx.cardview.widget.CardView>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/undo_task"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:visibility="gone"
+                android:focusable="true"
+                android:clickable="true"
+                app:cardCornerRadius="22.5dp"
+                app:cardElevation="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_marginEnd="16dp">
+
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/undo_task"
+                    app:srcCompat="@drawable/ic_undo"
+                    app:tint="@color/black"
+                    android:background="@color/white"
+                    android:focusable="false"
+                    android:clickable="false"/>
+
+            </androidx.cardview.widget.CardView>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
