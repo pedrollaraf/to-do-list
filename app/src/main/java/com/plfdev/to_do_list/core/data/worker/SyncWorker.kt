@@ -14,11 +14,18 @@ class SyncWorker(
 
     override suspend fun doWork(): Result {
         return try {
-            Log.d("BRATISLAV", "DO WORK")
-            syncTasksUseCases.invoke()
+            val result = syncTasksUseCases.invoke()
+            if(result.isSuccess) {
+                Log.d("BRATISLAV:","doWork Success")
+                Result.success()
+            } else {
+                //IF GET 404 FOR EXAMPLE WE HAVE TO MERGE LIST, SYNC AND SEND ALL TO SERVER AGAIN.
+                Log.d("BRATISLAV:","doWork Fail")
+                Result.failure()
+            }
             Result.success()
         } catch (e: Exception) {
-            Result.retry()
+            Result.failure()
         }
     }
 }

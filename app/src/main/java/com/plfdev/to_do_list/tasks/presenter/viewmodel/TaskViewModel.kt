@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.plfdev.to_do_list.core.data.networking.NetworkConnectivityObserver
 import com.plfdev.to_do_list.core.data.worker.SyncWorker
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class TaskViewModel (
     private val getTaskUseCases: GetTaskUseCases,
@@ -40,18 +42,45 @@ class TaskViewModel (
         emptyList()
     )
 
+    private var lastSyncTime: Long = 0L
+    private val syncCooldown: Long = 5000L // 5 segundos
+
     init {
         viewModelScope.launch {
             networkObserver.isConnected.collect { connected ->
                 if (connected) {
-                    val syncWorkRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
-                    workManager.enqueue(syncWorkRequest)
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastSyncTime >= syncCooldown) {
+                        lastSyncTime = currentTime
+
+                        val syncWorkRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+                        workManager.enqueue(syncWorkRequest)
+
+                        observeWorkStatus(syncWorkRequest.id)
+                    }
                 }
             }
         }
     }
 
-    private fun loadTasks() {
+    // Método para observar o estado de um WorkRequest específico
+    private fun observeWorkStatus(workId: UUID) {
+        viewModelScope.launch {
+            workManager.getWorkInfoByIdFlow(workId).collect { workInfo ->
+                if (workInfo != null && workInfo.state.isFinished) {
+                    if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                        Log.d("SyncWorker", "SUCCEEDED")
+                        loadTasks()
+                    } else {
+                        Log.e("SyncWorker", "FAILED")
+                    }
+                }
+            }
+        }
+    }
+
+
+    fun loadTasks() {
         viewModelScope.launch {
             val result = getTaskUseCases.invoke()
             result.onSuccess { tasks ->

@@ -1,11 +1,14 @@
 package com.plfdev.to_do_list.tasks.presenter.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.plfdev.to_do_list.databinding.DialogTaskBinding
 import com.plfdev.to_do_list.databinding.FragmentTaskBinding
 import com.plfdev.to_do_list.tasks.domain.model.Task
 import com.plfdev.to_do_list.tasks.presenter.viewmodel.TaskViewModel
@@ -33,17 +36,27 @@ class TaskFragment : Fragment() {
 
         lifecycleScope.launch {
             viewModel.tasks.collect { tasks ->
-                adapter.submitList(tasks)
+                if(tasks.isEmpty()) {
+                    binding.rvTasks.visibility = View.GONE
+                    binding.emptyList.visibility = View.VISIBLE
+                } else {
+                    binding.rvTasks.visibility = View.VISIBLE
+                    binding.emptyList.visibility = View.GONE
+                    adapter.submitList(tasks)
+                }
             }
         }
 
         binding.addButton.setOnClickListener {
-            val newToDoItem = Task(
-                title = "New Item",
-                description = "New description item",
-                isAdded = true
+            showDialog(
+                context = requireContext(),
+                onSave = { task ->
+                    val newTask = task.copy(
+                        isAdded = true
+                    )
+                    viewModel.addTask(newTask)
+                }
             )
-            viewModel.addTask(newToDoItem)
         }
 
         binding.syncButton.setOnClickListener {
@@ -61,12 +74,17 @@ class TaskFragment : Fragment() {
                 viewModel.updateTask(deletedTask)
             },
             onEditTask = { task ->
-                val updatedTask = task.copy(
-                    title = "TOTTENHAM",
-                    isUpdated = true,
-                    isSynced = false
+                showDialog(
+                    task = task,
+                    context = requireContext(),
+                    onSave = { taskItem ->
+                        val taskUpdated = taskItem.copy(
+                            isUpdated = true,
+                            isSynced = false
+                        )
+                        viewModel.updateTask(taskUpdated)
+                    }
                 )
-                viewModel.updateTask(updatedTask)
             },
             onUndoTask = { task ->
                 val undoTask = task.copy(
@@ -79,5 +97,49 @@ class TaskFragment : Fragment() {
         )
 
         binding.rvTasks.adapter = adapter
+    }
+
+    private fun showDialog(
+        task: Task? = null,
+        context: Context,
+        onSave: (Task) -> Unit
+    ) {
+        val builder = AlertDialog.Builder(context)
+        val dialogBinding = DialogTaskBinding.inflate(layoutInflater)
+        var dialogTitle: String = ""
+
+        if(task != null) {
+            dialogTitle = "Edit Task"
+            dialogBinding.editTextTitle.setText(task.title)
+            dialogBinding.editTextDescription.setText(task.description)
+            dialogBinding.checkBoxIsCompleted.isChecked = task.isCompleted
+        } else {
+            dialogTitle =  "Add Task"
+        }
+
+        builder.setView(dialogBinding.root)
+            .setTitle(dialogTitle)
+            .setPositiveButton("Save") { _, _ ->
+                val newTitle = dialogBinding.editTextTitle.text.toString()
+                val newDescription = dialogBinding.editTextDescription.text.toString()
+                val newIsCompleted = dialogBinding.checkBoxIsCompleted.isChecked
+
+                if(newTitle.isEmpty()) {
+                    dialogBinding.editTextTitle.error = "This field cant be empty"
+                } else {
+                    val newTask = Task(
+                        id = task?.id,
+                        title = newTitle,
+                        description = newDescription,
+                        isCompleted = newIsCompleted,
+                        isAdded = task?.isAdded ?: false,
+                    )
+
+                    onSave.invoke(newTask)
+                }
+
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }

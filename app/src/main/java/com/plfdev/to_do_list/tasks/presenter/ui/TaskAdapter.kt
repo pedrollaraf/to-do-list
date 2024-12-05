@@ -1,6 +1,7 @@
 package com.plfdev.to_do_list.tasks.presenter.ui
 
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +40,20 @@ class TaskAdapter(
                 binding.taskName.setTextColor(Color.GREEN)
             } else {
                 binding.taskName.setTextColor(Color.RED)
+            }
+
+            if(task.isCompleted) {
+                binding.completedTask.setImageResource(R.drawable.ic_check)
+                binding.completedTask.setColorFilter(
+                    ContextCompat.getColor(binding.completedTask.context, R.color.green),
+                    PorterDuff.Mode.SRC_IN
+                )
+            } else {
+                binding.completedTask.setImageResource(R.drawable.ic_normal)
+                binding.completedTask.setColorFilter(
+                    ContextCompat.getColor(binding.completedTask.context, R.color.black),
+                    PorterDuff.Mode.SRC_IN
+                )
             }
 
             if(task.isDeleted) {

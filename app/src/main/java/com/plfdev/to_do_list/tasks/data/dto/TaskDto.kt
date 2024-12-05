@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class TaskDto(
     val id: String,
     val title: String,
-    val description: String?,
-    val isCompleted: Boolean,
-    val isDeleted: Boolean,
+    val description: String? = null,
+    val isCompleted: Boolean = false,
+    val isDeleted: Boolean = false,
 )

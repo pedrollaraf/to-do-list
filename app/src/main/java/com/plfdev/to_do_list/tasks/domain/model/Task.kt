@@ -7,7 +7,7 @@ import kotlinx.serialization.Transient
 data class Task(
     val id: Long? = null,
     val title: String,
-    val description: String?,
+    val description: String? = null,
     val isCompleted: Boolean = false,
     val isDeleted: Boolean = false,
     @Transient val isAdded: Boolean = false,

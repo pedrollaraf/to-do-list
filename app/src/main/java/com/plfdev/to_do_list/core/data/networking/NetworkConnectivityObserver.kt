@@ -27,6 +27,11 @@ class NetworkConnectivityObserver(context: Context) : LifecycleObserver {
             _isConnected.value = true
         }
 
+        override fun onUnavailable() {
+            Log.d("BRATISLAV", "onUnavailable")
+            _isConnected.value = false
+        }
+
         override fun onLost(network: Network) {
             Log.d("BRATISLAV", "onLost")
             _isConnected.value = false
