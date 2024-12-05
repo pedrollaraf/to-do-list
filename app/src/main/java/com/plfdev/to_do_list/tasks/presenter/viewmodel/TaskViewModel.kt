@@ -3,6 +3,10 @@ package com.plfdev.to_do_list.tasks.presenter.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.plfdev.to_do_list.core.data.networking.NetworkConnectivityObserver
+import com.plfdev.to_do_list.core.data.worker.SyncWorker
 import com.plfdev.to_do_list.core.domain.util.Either.Companion.onFailure
 import com.plfdev.to_do_list.core.domain.util.Either.Companion.onSuccess
 import com.plfdev.to_do_list.tasks.domain.model.Task
@@ -23,6 +27,8 @@ class TaskViewModel (
     private val addTaskUseCases: AddTaskUseCases,
     private val updateTaskUseCases: UpdateTaskUseCases,
     private val syncTasksUseCases: SyncTasksUseCases,
+    val workManager: WorkManager,
+    val networkObserver: NetworkConnectivityObserver
 ): ViewModel() {
 
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())

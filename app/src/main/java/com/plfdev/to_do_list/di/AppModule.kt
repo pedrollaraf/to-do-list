@@ -1,7 +1,9 @@
 package com.plfdev.to_do_list.di
 
+import androidx.work.WorkManager
 import com.plfdev.to_do_list.core.data.local.AppDatabaseFactory
 import com.plfdev.to_do_list.core.data.networking.HttpClientFactory
+import com.plfdev.to_do_list.core.data.networking.NetworkConnectivityObserver
 import com.plfdev.to_do_list.tasks.data.repository.TaskRepositoryImpl
 import com.plfdev.to_do_list.tasks.domain.repository.TaskRepository
 import com.plfdev.to_do_list.tasks.domain.usecases.AddTaskUseCases
@@ -29,6 +31,9 @@ val appModule = module {
     singleOf(::AddTaskUseCases)
     singleOf(::UpdateTaskUseCases)
     singleOf(::SyncTasksUseCases)
+    single { NetworkConnectivityObserver(androidContext()) }
+    // WorkManager
+    single { WorkManager.getInstance(androidContext()) }
     viewModelOf(::TaskViewModel)
 }
 

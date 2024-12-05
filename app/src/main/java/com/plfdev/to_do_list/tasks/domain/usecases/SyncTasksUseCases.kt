@@ -9,6 +9,9 @@ import com.plfdev.to_do_list.tasks.domain.repository.TaskRepository
 class SyncTasksUseCases(
     private val taskRepository: TaskRepository
 ) {
+    //i did whole app fast that i could
+    //this is a mess omg, just do a single post and set whole list instead, update locally and be happy
+    //but this mock don't let you do that
     suspend operator fun invoke(): Either<List<Task>> {
         val tasks = taskRepository.getTasks().data ?: emptyList()
         val newList = tasks.toMutableList()
@@ -67,19 +70,3 @@ class SyncTasksUseCases(
         return Either.emptyResult()
     }
 }
-
-//taskRepository.getTasks().onSuccess { tasks ->
-//    tasks.map { task ->
-//        if(!task.isSynced) {
-//            //EU ADICIONO NO MOCK
-//            if(task.needSyncWhenAdd) {
-//
-//            }
-//            //EU ATUALIZO NO MOCK
-//            //EU DELETO NO MOCK
-//        } else {
-//            //EU ATUALIZO
-//            //EU DELETO
-//        }
-//    }
-//}
