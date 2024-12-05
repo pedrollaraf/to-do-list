@@ -1,7 +1,28 @@
 package com.plfdev.to_do_list
 
 import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
+import androidx.work.Configuration
+import androidx.work.WorkManager
+import com.plfdev.to_do_list.core.data.worker.AppWorkerFactory
+import com.plfdev.to_do_list.di.appModule
+import org.koin.android.ext.android.get
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
-@HiltAndroidApp
-class TaskApplication : Application()
+class TaskApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        startKoin {
+            androidContext(this@TaskApplication)
+            androidLogger()
+            modules(appModule)
+        }
+
+        val configuration = Configuration.Builder()
+            .setWorkerFactory(AppWorkerFactory(get()))
+            .build()
+        WorkManager.initialize(this, configuration)
+    }
+}
