@@ -27,8 +27,8 @@ class TaskViewModel (
     private val addTaskUseCases: AddTaskUseCases,
     private val updateTaskUseCases: UpdateTaskUseCases,
     private val syncTasksUseCases: SyncTasksUseCases,
-    val workManager: WorkManager,
-    val networkObserver: NetworkConnectivityObserver
+    private val workManager: WorkManager,
+    private val networkObserver: NetworkConnectivityObserver
 ): ViewModel() {
 
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
@@ -39,6 +39,17 @@ class TaskViewModel (
         SharingStarted.WhileSubscribed(5000L),
         emptyList()
     )
+
+    init {
+        viewModelScope.launch {
+            networkObserver.isConnected.collect { connected ->
+                if (connected) {
+                    val syncWorkRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+                    workManager.enqueue(syncWorkRequest)
+                }
+            }
+        }
+    }
 
     private fun loadTasks() {
         viewModelScope.launch {

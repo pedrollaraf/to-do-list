@@ -7,9 +7,10 @@ import android.net.NetworkRequest
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.OnLifecycleEvent
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 
 class NetworkConnectivityObserver(context: Context) : LifecycleObserver {
@@ -17,20 +18,18 @@ class NetworkConnectivityObserver(context: Context) : LifecycleObserver {
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    private val _isConnected = MutableLiveData<Boolean>()
-    val isConnected: LiveData<Boolean> = _isConnected
+    private val _isConnected = MutableStateFlow(false)
+    val isConnected: StateFlow<Boolean> get() = _isConnected.asStateFlow()
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             Log.d("BRATISLAV", "onAvailable")
-            _isConnected.postValue(true)
-
+            _isConnected.value = true
         }
 
         override fun onLost(network: Network) {
             Log.d("BRATISLAV", "onLost")
-            _isConnected.postValue(false)
-
+            _isConnected.value = false
         }
     }
 

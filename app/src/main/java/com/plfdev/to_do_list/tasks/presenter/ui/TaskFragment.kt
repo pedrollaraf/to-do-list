@@ -6,8 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.work.OneTimeWorkRequestBuilder
-import com.plfdev.to_do_list.core.data.worker.SyncWorker
 import com.plfdev.to_do_list.databinding.FragmentTaskBinding
 import com.plfdev.to_do_list.tasks.domain.model.Task
 import com.plfdev.to_do_list.tasks.presenter.viewmodel.TaskViewModel
@@ -36,13 +34,6 @@ class TaskFragment : Fragment() {
         lifecycleScope.launch {
             viewModel.tasks.collect { tasks ->
                 adapter.submitList(tasks)
-            }
-        }
-
-        viewModel.networkObserver.isConnected.observe(viewLifecycleOwner) { isConnected ->
-            if (isConnected) {
-                val syncWorkRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
-                viewModel.workManager.enqueue(syncWorkRequest)
             }
         }
 
