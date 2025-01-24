@@ -2,6 +2,7 @@ package com.plfdev.to_do_list.tasks.data.repository
 
 
 import android.util.Log
+import com.plfdev.to_do_list.BuildConfig
 import com.plfdev.to_do_list.core.data.networking.constructUrl
 import com.plfdev.to_do_list.core.data.networking.safeCall
 import com.plfdev.to_do_list.core.domain.util.DataError
@@ -15,7 +16,6 @@ import com.plfdev.to_do_list.tasks.data.mappers.toTask
 import com.plfdev.to_do_list.tasks.domain.model.Task
 import com.plfdev.to_do_list.tasks.domain.repository.TaskRepository
 import io.ktor.client.HttpClient
-import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -24,7 +24,8 @@ import io.ktor.http.contentType
 
 class TaskRepositoryImpl(
     private val taskDao: TaskDao,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val baseUrl: String = BuildConfig.BASE_URL
 ): TaskRepository {
     override suspend fun getTasks(): Either<List<Task>> {
         try {
@@ -33,7 +34,7 @@ class TaskRepositoryImpl(
             }
             return success(tasks)
         } catch (exception: Exception) {
-            return error(DataError.Local.GET_TASKS_ERROR)
+            return error(DataError.LocalError.GET_TASKS_ERROR)
         }
     }
 
@@ -44,7 +45,7 @@ class TaskRepositoryImpl(
             return success(result)
         } catch (exception: Exception) {
             Log.e("DATAERROR:",exception.toString())
-            return error(DataError.Local.DISK_FULL)
+            return error(DataError.LocalError.DISK_FULL)
         }
     }
 
@@ -54,14 +55,14 @@ class TaskRepositoryImpl(
             val result = taskDao.updateTask(entity)
             return success(result)
         } catch (exception: Exception) {
-            return error(DataError.Local.UPDATE_ERROR)
+            return error(DataError.LocalError.UPDATE_ERROR)
         }
     }
 
     override suspend fun syncTaskWhenAdd(task: Task): Either<TaskDto> {
         return safeCall<TaskDto> {
             httpClient.post(
-                urlString = constructUrl("/tasks")
+                urlString = constructUrl(baseUrl = baseUrl, url = "/tasks")
             ) {
                 contentType(ContentType.Application.Json)
                 setBody(task)
@@ -72,7 +73,7 @@ class TaskRepositoryImpl(
     override suspend fun syncTaskWhenUpdate(task: Task): Either<TaskDto> {
         return safeCall<TaskDto> {
             httpClient.put(
-                urlString = constructUrl("/tasks/${task.id}")
+                urlString = constructUrl(baseUrl = baseUrl, url = "/tasks/${task.id}")
             ) {
                 contentType(ContentType.Application.Json)
                 setBody(task)

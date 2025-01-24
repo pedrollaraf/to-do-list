@@ -47,6 +47,9 @@ android {
         buildConfig = true
         viewBinding = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 
@@ -77,6 +80,7 @@ dependencies {
 
     //KTOR
     implementation(libs.bundles.ktor)
+    testImplementation(libs.ktor.client.mock)
 
     //WORK MANAGER
     implementation (libs.androidx.work.runtime.ktx)
@@ -89,6 +93,6 @@ dependencies {
     testImplementation (libs.mockk)
     testImplementation (libs.kotlinx.coroutines.test)
     testImplementation (libs.mockwebserver)
-
+    testImplementation (libs.slf4j.simple)
 
 }
