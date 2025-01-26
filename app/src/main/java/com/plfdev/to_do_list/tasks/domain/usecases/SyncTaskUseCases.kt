@@ -60,7 +60,7 @@ class SyncTasksUseCases(
                             return Either.error(DataError.LocalError.UPDATE_ERROR)
                         }
                     } else{
-                        return Either.error(DataError.NetworkError.SERVER_ERROR)
+                        return Either.error(result.error!!)
                     }
                 }
             }

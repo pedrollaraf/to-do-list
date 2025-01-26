@@ -92,6 +92,7 @@ dependencies {
     //MOCKK
     testImplementation (libs.mockk)
     testImplementation (libs.kotlinx.coroutines.test)
+    testImplementation (libs.androidx.core.testing)
     testImplementation (libs.mockwebserver)
     testImplementation (libs.slf4j.simple)
 

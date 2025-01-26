@@ -16,13 +16,35 @@ suspend inline fun <reified T> safeCall(
     val response = try {
         execute()
     } catch (e: UnresolvedAddressException) {
-        return Either.error(NetworkError.NO_INTERNET)
+        logError("No Internet error: ", e)
+        return Either.error(
+            NetworkError.NO_INTERNET (
+                code = null,
+                e.message.orEmpty()
+            )
+        )
     } catch (e: SerializationException) {
-        Log.d("BRATISLAV:", e.toString())
-        return Either.error(NetworkError.SERIALIZATION)
+        logError("Serialization error: ", e)
+        return Either.error(
+            NetworkError.SERIALIZATION(
+                code = null,
+                message = e.message.orEmpty()
+            )
+        )
     } catch (e: Exception) {
         coroutineContext.ensureActive()
-        return Either.error(NetworkError.UNKNOWN)
+        logError("Unknown error: ", e)
+        return Either.error(
+            NetworkError.UNKNOWN(
+                code = null,
+                message = e.message.orEmpty()
+            )
+        )
     }
     return responseToResult(response)
+}
+
+// Função para logar erros (pode ser adaptada para usar uma ferramenta de monitoramento)
+fun logError(title: String, exception: Exception) {
+    Log.e(title, exception.message.orEmpty())
 }

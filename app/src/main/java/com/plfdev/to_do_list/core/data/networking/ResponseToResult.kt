@@ -10,19 +10,50 @@ suspend inline fun <reified T> responseToResult(
     response: HttpResponse,
 ): Either<T> {
     return when (response.status.value) {
-        in 200..299 -> {
-            try {
-                Either.success(response.body<T>())
-            } catch (e: NoTransformationFoundException) {
-                Either.error(NetworkError.SERIALIZATION)
-            }
-        }
-        401 -> Either.error(NetworkError.UNAUTHORIZED)
-        403 -> Either.error(NetworkError.FORBIDDEN)
-        404 -> Either.error(NetworkError.NOT_FOUND)
-        408 -> Either.error(NetworkError.REQUEST_TIMEOUT)
-        429 -> Either.error(NetworkError.TOO_MANY_REQUESTS)
-        in 500..599 -> Either.error(NetworkError.SERVER_ERROR)
-        else -> Either.error(NetworkError.UNKNOWN)
+        in 200..299 -> handleSuccess(response)
+        else -> handleError(response)
+    }
+}
+
+// Função para lidar com sucesso
+suspend inline fun <reified T> handleSuccess(
+    response: HttpResponse
+): Either<T> {
+    return try {
+        Either.success(response.body())
+    } catch (e: NoTransformationFoundException) {
+        Either.error(
+            NetworkError.SERIALIZATION(
+                code = response.status.value,
+                message = response.extractErrorMessage()
+            )
+        )
+    }
+}
+
+// Função para lidar com erros
+suspend fun handleError(
+    response: HttpResponse
+): Either<Nothing> {
+    val statusCode = response.status.value
+    val errorMessage = response.extractErrorMessage()
+
+    val networkError = when (statusCode) {
+        400 -> NetworkError.BAD_REQUEST(code = statusCode, message = errorMessage)
+        404 -> NetworkError.NOT_FOUND(code = statusCode, message = errorMessage)
+        408 -> NetworkError.REQUEST_TIMEOUT(code = statusCode, message = errorMessage)
+        in 500..599 -> NetworkError.SERVER_ERROR(code = statusCode, message = errorMessage)
+        else -> NetworkError.UNKNOWN(code = statusCode, message = errorMessage)
+    }
+
+    return Either.error(networkError)
+}
+
+// Função para extrair mensagem de erro
+suspend fun HttpResponse.extractErrorMessage(): String {
+    return try {
+        this.body<Map<String, String>?>()?.get("message").orEmpty()
+    } catch (e: Exception) {
+        "" // Retorna uma string vazia se ocorrer erro ao processar o body
     }
 }

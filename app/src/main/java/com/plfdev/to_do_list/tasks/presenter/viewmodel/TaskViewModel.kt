@@ -16,11 +16,8 @@ import com.plfdev.to_do_list.tasks.domain.usecases.GetTaskUseCases
 import com.plfdev.to_do_list.tasks.domain.usecases.SyncTasksUseCases
 import com.plfdev.to_do_list.tasks.domain.usecases.UpdateTaskUseCases
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -34,33 +31,14 @@ class TaskViewModel (
 ): ViewModel() {
 
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
-    val tasks: StateFlow<List<Task>> = _tasks.asStateFlow().onStart {
-        loadTasks()
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000L),
-        emptyList()
-    )
+    val tasks: StateFlow<List<Task>> = _tasks.asStateFlow()
 
     private var lastSyncTime: Long = 0L
     private val syncCooldown: Long = 5000L // 5 segundos
 
     init {
-        viewModelScope.launch {
-            networkObserver.isConnected.collect { connected ->
-                if (connected) {
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastSyncTime >= syncCooldown) {
-                        lastSyncTime = currentTime
-
-                        val syncWorkRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
-                        workManager.enqueue(syncWorkRequest)
-
-                        observeWorkStatus(syncWorkRequest.id)
-                    }
-                }
-            }
-        }
+        loadTasks()
+        observeNetwork()
     }
 
     // Método para observar o estado de um WorkRequest específico
@@ -73,6 +51,24 @@ class TaskViewModel (
                         loadTasks()
                     } else {
                         Log.e("SyncWorker", "FAILED")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeNetwork() {
+        viewModelScope.launch {
+            networkObserver.isConnected.collect { connected ->
+                if (connected) {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastSyncTime >= syncCooldown) {
+                        lastSyncTime = currentTime
+
+                        val syncWorkRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+                        workManager.enqueue(syncWorkRequest)
+
+                        observeWorkStatus(syncWorkRequest.id)
                     }
                 }
             }

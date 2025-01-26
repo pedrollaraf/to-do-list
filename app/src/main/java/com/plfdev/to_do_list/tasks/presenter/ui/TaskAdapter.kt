@@ -43,13 +43,13 @@ class TaskAdapter(
             }
 
             if(task.isCompleted) {
-                binding.completedTask.setImageResource(R.drawable.ic_check)
+                binding.completedTask.setImageResource(R.drawable.ic_circle_check)
                 binding.completedTask.setColorFilter(
                     ContextCompat.getColor(binding.completedTask.context, R.color.green),
                     PorterDuff.Mode.SRC_IN
                 )
             } else {
-                binding.completedTask.setImageResource(R.drawable.ic_normal)
+                binding.completedTask.setImageResource(R.drawable.ic_circle)
                 binding.completedTask.setColorFilter(
                     ContextCompat.getColor(binding.completedTask.context, R.color.black),
                     PorterDuff.Mode.SRC_IN

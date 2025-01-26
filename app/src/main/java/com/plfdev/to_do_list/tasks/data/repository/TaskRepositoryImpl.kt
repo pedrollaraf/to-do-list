@@ -2,7 +2,6 @@ package com.plfdev.to_do_list.tasks.data.repository
 
 
 import android.util.Log
-import com.plfdev.to_do_list.BuildConfig
 import com.plfdev.to_do_list.core.data.networking.constructUrl
 import com.plfdev.to_do_list.core.data.networking.safeCall
 import com.plfdev.to_do_list.core.domain.util.DataError
@@ -22,10 +21,10 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
-class TaskRepositoryImpl(
+class  TaskRepositoryImpl(
     private val taskDao: TaskDao,
     private val httpClient: HttpClient,
-    private val baseUrl: String = BuildConfig.BASE_URL
+    private val baseUrl: String
 ): TaskRepository {
     override suspend fun getTasks(): Either<List<Task>> {
         try {

@@ -1,4 +1,4 @@
-package com.plfdev.to_do_list.tasks.data.entitiy
+package com.plfdev.to_do_list.tasks.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -1,6 +1,7 @@
 package com.plfdev.to_do_list.di
 
 import androidx.work.WorkManager
+import com.plfdev.to_do_list.BuildConfig
 import com.plfdev.to_do_list.core.data.local.AppDatabaseFactory
 import com.plfdev.to_do_list.core.data.networking.HttpClientFactory
 import com.plfdev.to_do_list.core.data.networking.NetworkConnectivityObserver
@@ -15,7 +16,6 @@ import io.ktor.client.engine.cio.CIO
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
 
@@ -26,7 +26,13 @@ val appModule = module {
     single {
         AppDatabaseFactory.create(context = androidContext()).taskDao()
     }
-    singleOf(::TaskRepositoryImpl).bind<TaskRepository>()
+    single<TaskRepository> {
+        TaskRepositoryImpl(
+            taskDao = get(),
+            httpClient = get(),
+            baseUrl = BuildConfig.BASE_URL
+        )
+    }
     singleOf(::GetTaskUseCases)
     singleOf(::AddTaskUseCases)
     singleOf(::UpdateTaskUseCases)

@@ -5,65 +5,69 @@ sealed interface DataError : Error {
     sealed interface NetworkError : DataError {
         val friendlyMessage: String
         val statusCode: Int?
+        val messageError: String?
 
-        data object REQUEST_TIMEOUT : NetworkError {
+        data class REQUEST_TIMEOUT(
+            val code: Int? = null,
+            val message: String?= null,
+        ) : NetworkError {
             override val friendlyMessage = "A requisição demorou muito tempo para responder."
-            override val statusCode = 408
+            override val statusCode get() =  code
+            override val messageError: String? get() = message
         }
 
-        data object UNAUTHORIZED : NetworkError {
-            override val friendlyMessage = "Não autorizado. Verifique suas credenciais."
-            override val statusCode = 401
+        data class BAD_REQUEST (
+            val code: Int? = null,
+            val message: String?= null,
+        ) : NetworkError {
+            override val friendlyMessage = "Não suportado. Verifique as credenciais"
+            override val statusCode get() =  code
+            override val messageError: String? get() = message
         }
 
-        data object FORBIDDEN : NetworkError {
-            override val friendlyMessage = "Não autorizado pelo servidor."
-            override val statusCode = 403
-        }
-
-        data object NOT_FOUND : NetworkError {
+        data class NOT_FOUND(
+            val code: Int? = null,
+            val message: String? = null,
+        ) : NetworkError {
             override val friendlyMessage = "Não encontrado"
-            override val statusCode = 404
+            override val statusCode get() =  code
+            override val messageError: String? get() = message
         }
 
-        data object CONFLICT : NetworkError {
-            override val friendlyMessage = "Conflito de dados encontrado."
-            override val statusCode = 409
-        }
-
-        data object TOO_MANY_REQUESTS : NetworkError {
-            override val friendlyMessage = "Muitas requisições em um curto intervalo de tempo."
-            override val statusCode = 429
-        }
-
-        data object NO_INTERNET : NetworkError {
+        data class NO_INTERNET(
+            val code: Int? = null,
+            val message: String?= null,
+        ) : NetworkError {
             override val friendlyMessage = "Sem conexão com a internet."
-            override val statusCode = null
+            override val statusCode get() =  code
+            override val messageError: String? get() = message
         }
 
-        data object PAYLOAD_TOO_LARGE : NetworkError {
-            override val friendlyMessage = "Payload muito grande."
-            override val statusCode = 413
-        }
-
-        data object SERVER_ERROR : NetworkError {
+        data class SERVER_ERROR(
+            val code: Int? = null,
+            val message: String?= null,
+        ) : NetworkError {
             override val friendlyMessage = "Erro no servidor. Tente novamente mais tarde."
-            override val statusCode = 500
+            override val statusCode get() =  code
+            override val messageError: String? get() = message
         }
 
-        data object SERIALIZATION : NetworkError {
+        data class SERIALIZATION(
+            val code: Int? = null,
+            val message: String?= null,
+        ) : NetworkError {
             override val friendlyMessage = "Erro ao processar os dados."
-            override val statusCode = null
+            override val statusCode get() =  code
+            override val messageError: String? get() = message
         }
 
-        data object UNKNOWN : NetworkError {
+        data class UNKNOWN(
+            val code: Int? = null,
+            val message: String?= null,
+        ) : NetworkError {
             override val friendlyMessage = "Erro desconhecido."
-            override val statusCode = null
-        }
-
-        data object SYNC : NetworkError {
-            override val friendlyMessage = "Erro ao sincronizar os dados."
-            override val statusCode = null
+            override val statusCode get() =  code
+            override val messageError: String? get() = message
         }
     }
 

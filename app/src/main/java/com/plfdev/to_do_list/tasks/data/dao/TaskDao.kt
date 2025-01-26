@@ -6,7 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.plfdev.to_do_list.tasks.data.entitiy.TaskEntity
+import com.plfdev.to_do_list.tasks.data.entity.TaskEntity
+
 @Dao
 interface TaskDao {
     @Query("SELECT * FROM tasks")

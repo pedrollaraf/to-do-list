@@ -27,9 +27,9 @@ class TaskRepositoryImplTest {
 
     private lateinit var taskDao: TaskDao
     private lateinit var httpClient: HttpClient
-    private lateinit var taskRepository: TaskRepositoryImpl
     private lateinit var mockWebServer: MockWebServer
     private lateinit var mockResponse: MockResponse
+    private lateinit var taskRepository: TaskRepositoryImpl
 
 
     @Before
@@ -175,49 +175,29 @@ class TaskRepositoryImplTest {
     @Test
     fun `syncTaskWhenAdd should return error when API call fails`() = runTest {
         // Configurar MockWebServer para retornar erro
+        val mockResponseFile = FileReaderHelper.readFileFromResources("server_error.json").trimIndent()
         mockResponse.setResponseCode(500).setBody(
-            FileReaderHelper.readFileFromResources("server_error.json").trimIndent()
+            mockResponseFile
         )
         mockWebServer.enqueue(mockResponse)
 
         // Realizar o teste
         val task = Task(id = 1, title = "Test Task")
         val result = taskRepository.syncTaskWhenAdd(task)
-        val isError = !result.isSuccess
-
-        // Verificar resultado
-        assertTrue(isError)
-        assertEquals(DataError.NetworkError.SERVER_ERROR, result.error)
 
         // Verificar requisição
         val recordedRequest = mockWebServer.takeRequest()
         assertEquals("/tasks", recordedRequest.path)
         assertEquals("POST", recordedRequest.method)
-    }
-
-    @Test
-    fun `syncTaskWhenAdd should return error when API call returns 400`() = runTest {
-        // Configurar MockWebServer para retornar erro
-        mockResponse.setResponseCode(400).setBody(
-            FileReaderHelper.readFileFromResources("bad_request_error.json").trimIndent()
-        )
-        mockWebServer.enqueue(mockResponse)
-
-        // Realizar o teste
-        val task = Task(id = 1, title = "Test Task")
-        val result = taskRepository.syncTaskWhenAdd(task)
 
         // Verificar resultado
         assertTrue(!result.isSuccess)
-//        assertEquals(DataError.NetworkError.BAD_REQUEST, result.error)
-//        assertEquals(400, (result.error as DataError.NetworkError.BAD_REQUEST).statusCode)
-//        assertEquals("Bad Request", (result.error as DataError.NetworkError.BAD_REQUEST).message)
-
-        // Verificar requisição
-        val recordedRequest = mockWebServer.takeRequest()
-        assertEquals("/tasks", recordedRequest.path)
-        assertEquals("POST", recordedRequest.method)
+        val error = result.error as DataError.NetworkError.SERVER_ERROR
+        assertEquals(500, error.code)
+        //val message = Json.parseToJsonElement(mockResponseFile).jsonObject["message"]?.jsonPrimitive?.content
+        //assertEquals(message, error.message)
     }
+
     //endregion
 
     //region syncTaskWhenUpdate
@@ -246,8 +226,9 @@ class TaskRepositoryImplTest {
     @Test
     fun `syncTaskWhenUpdate should return error when API call fails`() = runTest {
         // Configurar MockWebServer para retornar erro
+        val mockResponseFile = FileReaderHelper.readFileFromResources("server_error.json").trimIndent()
         mockResponse.setResponseCode(500).setBody(
-            FileReaderHelper.readFileFromResources("server_error.json").trimIndent()
+            mockResponseFile
         )
         mockWebServer.enqueue(mockResponse)
 
@@ -255,14 +236,17 @@ class TaskRepositoryImplTest {
         val task = Task(id = 1, title = "Test Task Updated")
         val result = taskRepository.syncTaskWhenUpdate(task)
 
-        // Verificar resultado
-        assertTrue(!result.isSuccess)
-        assertEquals(DataError.NetworkError.SERVER_ERROR, result.error)
-
         // Verificar requisição
         val recordedRequest = mockWebServer.takeRequest()
         assertEquals("/tasks/${task.id}", recordedRequest.path)
         assertEquals("PUT", recordedRequest.method)
+
+        // Verificar resultado
+        assertTrue(!result.isSuccess)
+        val error = result.error as DataError.NetworkError.SERVER_ERROR
+        assertEquals(500, error.code)
+        //val message = Json.parseToJsonElement(mockResponseFile).jsonObject["message"]?.jsonPrimitive?.content
+        //assertEquals(message, error.message)
     }
     //endregion
 

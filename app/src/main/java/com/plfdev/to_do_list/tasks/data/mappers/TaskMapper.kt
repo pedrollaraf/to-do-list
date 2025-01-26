@@ -1,6 +1,6 @@
 package com.plfdev.to_do_list.tasks.data.mappers
 
-import com.plfdev.to_do_list.tasks.data.entitiy.TaskEntity
+import com.plfdev.to_do_list.tasks.data.entity.TaskEntity
 import com.plfdev.to_do_list.tasks.domain.model.Task
 
 //TaskEntity

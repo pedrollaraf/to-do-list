@@ -55,15 +55,15 @@ fun Either<*>.get(onSuccess: (Any) -> Unit, onFailure: (DataError) -> Unit){
     }
 }
 
-suspend fun <T> getResult(call: suspend () -> Either<T?>): Either<T> {
-    try {
-        val response = call()
-        return if(response.data != null){
-            Either.success(response.data)
-        }else{
-            Either.error(DataError.NetworkError.SERIALIZATION)
-        }
-    } catch (e: Exception) {
-        return error(e)
-    }
-}
+//suspend fun <T> getResult(call: suspend () -> Either<T?>): Either<T> {
+//    try {
+//        val response = call()
+//        return if(response.data != null){
+//            Either.success(response.data)
+//        }else{
+//            Either.error(DataError.NetworkError.SERIALIZATION)
+//        }
+//    } catch (e: Exception) {
+//        return error(e)
+//    }
+//}
