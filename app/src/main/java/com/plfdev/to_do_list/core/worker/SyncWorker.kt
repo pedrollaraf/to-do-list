@@ -23,7 +23,6 @@ class SyncWorker(
                 Log.d("BRATISLAV:","doWork Fail")
                 Result.failure()
             }
-            Result.success()
         } catch (e: Exception) {
             Result.failure()
         }
