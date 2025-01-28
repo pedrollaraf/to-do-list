@@ -44,7 +44,7 @@ class UpdateTaskUseCasesTest {
     fun `invoke should return error when repository fails`() = runTest {
         // Arrange
         val task = Task(1, "Task 1", "Description 1", true)
-        coEvery { taskRepository.updateTask(task) } returns Either.error(DataError.LocalError.UPDATE_ERROR)
+        coEvery { taskRepository.updateTask(task) } returns Either.failure(DataError.LocalError.UPDATE_ERROR)
 
         // Act
         val result = updateTaskUseCases.invoke(task)

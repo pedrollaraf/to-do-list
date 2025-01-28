@@ -52,7 +52,7 @@ class SyncWorkerTest {
     @Test
     fun `doWork should return failure when use case fails`() = runTest {
         // Arrange
-        coEvery { mockSyncTasksUseCases.invoke() } returns Either.error(DataError.LocalError.UPDATE_ERROR)
+        coEvery { mockSyncTasksUseCases.invoke() } returns Either.failure(DataError.LocalError.UPDATE_ERROR)
 
         // Act
         val result = syncWorker.doWork()

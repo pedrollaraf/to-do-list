@@ -45,7 +45,7 @@ class GetTaskUseCasesTest {
     @Test
     fun `invoke should return Either with error when repository fails`() = runTest {
         // Arrange
-        coEvery { taskRepository.getTasks() } returns Either.error(DataError.LocalError.GET_TASKS_ERROR)
+        coEvery { taskRepository.getTasks() } returns Either.failure(DataError.LocalError.GET_TASKS_ERROR)
 
         // Act
         val result = getTaskUseCases.invoke()

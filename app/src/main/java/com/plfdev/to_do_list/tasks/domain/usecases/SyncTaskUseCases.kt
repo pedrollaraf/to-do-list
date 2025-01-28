@@ -57,10 +57,10 @@ class SyncTasksUseCases(
                             val position = newList.indexOfFirst { it.id == taskSync.id }
                             newList[position] = taskSync
                         } else {
-                            return Either.error(DataError.LocalError.UPDATE_ERROR)
+                            return Either.failure(DataError.LocalError.UPDATE_ERROR)
                         }
                     } else{
-                        return Either.error(result.error!!)
+                        return Either.failure(result.error!!)
                     }
                 }
             }

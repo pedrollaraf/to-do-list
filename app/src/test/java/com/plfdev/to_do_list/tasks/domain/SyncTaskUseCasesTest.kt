@@ -71,7 +71,7 @@ class SyncTaskUseCasesTest {
         val task = Task(1L, "Task 1", "Description 1", isSynced = false, isAdded = true)
         val tasks = listOf(task)
         coEvery { taskRepository.getTasks() } returns Either.success(tasks)
-        coEvery { taskRepository.syncTaskWhenAdd(task) } returns Either.error(DataError.NetworkError.SERVER_ERROR())
+        coEvery { taskRepository.syncTaskWhenAdd(task) } returns Either.failure(DataError.NetworkError.SERVER_ERROR())
 
         // Act
         val result = syncTasksUseCases.invoke()
@@ -90,7 +90,7 @@ class SyncTaskUseCasesTest {
         val tasks = listOf(task)
         coEvery { taskRepository.getTasks() } returns Either.success(tasks)
         coEvery { taskRepository.syncTaskWhenAdd(task) } returns Either.success(TaskDto(task.id.toString(), task.title, task.description))
-        coEvery { taskRepository.updateTask(syncedTask) } returns Either.error(DataError.LocalError.UPDATE_ERROR)
+        coEvery { taskRepository.updateTask(syncedTask) } returns Either.failure(DataError.LocalError.UPDATE_ERROR)
 
         // Act
         val result = syncTasksUseCases.invoke()

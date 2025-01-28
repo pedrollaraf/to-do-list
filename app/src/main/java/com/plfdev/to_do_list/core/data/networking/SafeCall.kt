@@ -17,7 +17,7 @@ suspend inline fun <reified T> safeCall(
         execute()
     } catch (e: UnresolvedAddressException) {
         logError("No Internet error: ", e)
-        return Either.error(
+        return Either.failure(
             NetworkError.NO_INTERNET (
                 code = null,
                 e.message.orEmpty()
@@ -25,7 +25,7 @@ suspend inline fun <reified T> safeCall(
         )
     } catch (e: SerializationException) {
         logError("Serialization error: ", e)
-        return Either.error(
+        return Either.failure(
             NetworkError.SERIALIZATION(
                 code = null,
                 message = e.message.orEmpty()
@@ -34,7 +34,7 @@ suspend inline fun <reified T> safeCall(
     } catch (e: Exception) {
         coroutineContext.ensureActive()
         logError("Unknown error: ", e)
-        return Either.error(
+        return Either.failure(
             NetworkError.UNKNOWN(
                 code = null,
                 message = e.message.orEmpty()

@@ -22,7 +22,7 @@ suspend inline fun <reified T> handleSuccess(
     return try {
         Either.success(response.body())
     } catch (e: NoTransformationFoundException) {
-        Either.error(
+        Either.failure(
             NetworkError.SERIALIZATION(
                 code = response.status.value,
                 message = response.extractErrorMessage()
@@ -46,7 +46,7 @@ suspend fun handleError(
         else -> NetworkError.UNKNOWN(code = statusCode, message = errorMessage)
     }
 
-    return Either.error(networkError)
+    return Either.failure(networkError)
 }
 
 // Função para extrair mensagem de erro

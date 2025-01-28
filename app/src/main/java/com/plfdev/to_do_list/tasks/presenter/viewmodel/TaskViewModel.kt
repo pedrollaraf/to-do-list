@@ -42,7 +42,7 @@ class TaskViewModel (
     }
 
     // Método para observar o estado de um WorkRequest específico
-    private fun observeWorkStatus(workId: UUID) {
+    fun observeWorkStatus(workId: UUID) {
         viewModelScope.launch {
             workManager.getWorkInfoByIdFlow(workId).collect { workInfo ->
                 if (workInfo != null && workInfo.state.isFinished) {

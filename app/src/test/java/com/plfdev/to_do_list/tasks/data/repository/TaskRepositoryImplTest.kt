@@ -75,7 +75,7 @@ class TaskRepositoryImplTest {
         val result = taskRepository.getTasks()
 
         // Então devemos receber um erro com o tipo correto de erro
-        val expectedError = Either.error<List<Task>>(DataError.LocalError.GET_TASKS_ERROR)
+        val expectedError = Either.failure<List<Task>>(DataError.LocalError.GET_TASKS_ERROR)
         assertEquals(result, expectedError)
     }
     //endregion
@@ -110,7 +110,7 @@ class TaskRepositoryImplTest {
         val result = taskRepository.addTask(task)
 
         // Então devemos receber um erro com o tipo correto de erro
-        val expectedError = Either.error<DataError>(DataError.LocalError.DISK_FULL)
+        val expectedError = Either.failure<DataError>(DataError.LocalError.DISK_FULL)
         assertEquals(expectedError, result)
     }
     //endregion
@@ -145,7 +145,7 @@ class TaskRepositoryImplTest {
         val result = taskRepository.updateTask(task)
 
         // Então devemos receber um erro com o tipo correto de erro
-        val expectedError = Either.error<DataError>(DataError.LocalError.UPDATE_ERROR)
+        val expectedError = Either.failure<DataError>(DataError.LocalError.UPDATE_ERROR)
         assertEquals(expectedError, result)
     }
     //endregion

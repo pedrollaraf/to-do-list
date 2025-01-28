@@ -25,7 +25,7 @@ data class Either<out T>(val status: Status, val data: T?, val error: DataError?
             return Either(Status.LOADING, null, null)
         }
 
-        fun <T> error(error: DataError): Either<T> {
+        fun <T> failure(error: DataError): Either<T> {
             return Either(Status.ERROR, null, error)
         }
 

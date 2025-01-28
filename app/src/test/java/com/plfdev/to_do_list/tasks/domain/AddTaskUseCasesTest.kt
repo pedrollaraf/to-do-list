@@ -43,7 +43,7 @@ class AddTaskUseCasesTest {
         // Arrange
         val task = Task(id = 0, title = "Test Task", description = "Test Description", isCompleted = false)
 
-        coEvery { taskRepository.addTask(task) } returns Either.error(DataError.LocalError.DISK_FULL)
+        coEvery { taskRepository.addTask(task) } returns Either.failure(DataError.LocalError.DISK_FULL)
 
         // Act
         val result = addTaskUseCases.invoke(task)

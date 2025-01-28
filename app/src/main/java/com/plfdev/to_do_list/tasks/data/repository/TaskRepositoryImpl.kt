@@ -6,7 +6,7 @@ import com.plfdev.to_do_list.core.data.networking.constructUrl
 import com.plfdev.to_do_list.core.data.networking.safeCall
 import com.plfdev.to_do_list.core.domain.util.DataError
 import com.plfdev.to_do_list.core.domain.util.Either
-import com.plfdev.to_do_list.core.domain.util.Either.Companion.error
+import com.plfdev.to_do_list.core.domain.util.Either.Companion.failure
 import com.plfdev.to_do_list.core.domain.util.Either.Companion.success
 import com.plfdev.to_do_list.tasks.data.dao.TaskDao
 import com.plfdev.to_do_list.tasks.data.dto.TaskDto
@@ -33,7 +33,7 @@ class  TaskRepositoryImpl(
             }
             return success(tasks)
         } catch (exception: Exception) {
-            return error(DataError.LocalError.GET_TASKS_ERROR)
+            return failure(DataError.LocalError.GET_TASKS_ERROR)
         }
     }
 
@@ -44,7 +44,7 @@ class  TaskRepositoryImpl(
             return success(result)
         } catch (exception: Exception) {
             Log.e("DATAERROR:",exception.toString())
-            return error(DataError.LocalError.DISK_FULL)
+            return failure(DataError.LocalError.DISK_FULL)
         }
     }
 
@@ -54,7 +54,7 @@ class  TaskRepositoryImpl(
             val result = taskDao.updateTask(entity)
             return success(result)
         } catch (exception: Exception) {
-            return error(DataError.LocalError.UPDATE_ERROR)
+            return failure(DataError.LocalError.UPDATE_ERROR)
         }
     }
 
